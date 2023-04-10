@@ -1,5 +1,3 @@
-const { validationResult } = require('express-validator/check');
-
 //현재 게시물 리스트 
 exports.getPosts = (req, res, next) => {
     //더이상 뷰를 렌더링 하지 않을것이므로 데이터 받는 코드 작성
