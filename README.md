@@ -33,3 +33,7 @@ postData("https://example.com/answer", { answer: 42 }).then((data) => {
   console.log(data); // JSON data parsed by `data.json()` call
 });
 ```
+
+#데이터베이스
+-몽고디비 사용
+-몽구스로 스키마 작업
