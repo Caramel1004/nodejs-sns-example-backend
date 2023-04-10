@@ -1,3 +1,4 @@
+const e = require('express');
 const Post = require('../models/post');
 
 //현재 게시물 리스트 
@@ -39,5 +40,14 @@ exports.postPost = (req, res, next) => {
             });
         }).catch(err => {
             console.log('feed.js controller: ', err);
+            // 에러 상태코드 체크
+            if (!err.statusCode) {
+                err.statusCode = 500;
+            } else {
+                //비동기 코드 스니펫 내부에 있으므로 error을 throw 하더라도
+                // 다음 오류 처리 미들웨어로 넘어갈 수 없습니다
+                // 대신 next 함수를 사용하고 여기에 error을 입력해야 합니다.
+                next(err);
+            }
         });
 }
