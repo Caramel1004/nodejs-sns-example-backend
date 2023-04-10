@@ -1,3 +1,4 @@
+//현재 게시물 리스트 
 exports.getPosts = (req, res, next) => {
     //더이상 뷰를 렌더링 하지 않을것이므로 데이터 받는 코드 작성
     res.status(200).json({
@@ -14,6 +15,7 @@ exports.getPosts = (req, res, next) => {
     })
 }
 
+//게시물 추가
 exports.postPost = (req, res, next) => {
     const title = req.body.title;
     const content = req.body.content;
@@ -21,9 +23,13 @@ exports.postPost = (req, res, next) => {
     res.status(201).json({
         message: '게시물이 성공적으로 생성되었습니다.',
         post: {
-            id: new Date().toISOString(),
+            _id: new Date().toISOString(),
             title: title,
-            content: content
+            content: content,
+            creator: {
+                name: 'caramel1004'
+            },
+            createdAt: new Date()
         }
     });
 }
