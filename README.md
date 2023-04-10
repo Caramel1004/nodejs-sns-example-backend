@@ -35,5 +35,5 @@ postData("https://example.com/answer", { answer: 42 }).then((data) => {
 ```
 
 # 데이터베이스
--몽고디비 사용
--몽구스로 스키마 작업
+- 몽고디비 사용
+- 몽구스로 스키마 작업
