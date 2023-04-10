@@ -1,4 +1,4 @@
-# nodejs-sns-example
+# nodejs-sns-example-backend
 nodejs로 sns 구축 연습 프로젝트
 
 - RESTful API로 앱 구축
