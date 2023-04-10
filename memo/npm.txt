@@ -1,0 +1,6 @@
+express
+nodemon
+ejs
+body-parser
+
+npm init
