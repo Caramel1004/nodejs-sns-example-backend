@@ -51,11 +51,13 @@ exports.getPostDetail = (req, res, next) => {
 exports.postPost = (req, res, next) => {
     const title = req.body.title;
     const content = req.body.content;
+    const imageUrl = req.file.path.replace("\\" ,"/");
+    console.log(imageUrl);
 
     const post = new Post({
         title: title,
         content: content,
-        imageUrl: 'images/Ryze.jpg',
+        imageUrl: imageUrl,
         creator: {
             name: 'caramel'
         }
@@ -80,3 +82,8 @@ exports.postPost = (req, res, next) => {
             }
         });
 }
+
+exports.updatePost = (req, res, next) => {
+    const imageUrl = req.file.path.replace("\\" ,"/");
+}
+

@@ -19,7 +19,21 @@ const validResult = (req, res, next) => {
         //     message: '유효성 검사 결과: 실패',
         //     errors: errors.array()
         // })
-    }else{
+    } else {
+        next();
+    }
+}
+
+// 이미지 유무 체크 함수
+const hasImageFile = (req, res, next) => {
+    const imageFile = req.file;
+
+    // 이미지파일 유무
+    if (!imageFile) {
+        const error = new Error('이미지 파일이 없습니다.');
+        error.statusCode = 422;
+        throw error;
+    } else {
         next();
     }
 }
@@ -28,7 +42,8 @@ const validResult = (req, res, next) => {
 module.exports.postValidCheck = [
     body('title').trim().isLength({ min: 5 }),
     body('content').trim().isLength({ min: 5 }),
-    validResult
+    validResult,
+    hasImageFile
 ]
 
 // 사용자 유효성 검사
