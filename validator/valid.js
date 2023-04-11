@@ -1,4 +1,4 @@
-const { body, validationResult } = require('express-validator/check');
+const { body, validationResult } = require('express-validator');
 
 
 // 유효성 검사 함수
@@ -19,8 +19,9 @@ const validResult = (req, res, next) => {
         //     message: '유효성 검사 결과: 실패',
         //     errors: errors.array()
         // })
+    }else{
+        next();
     }
-    // next();
 }
 
 // 게시물 유효성 검사
