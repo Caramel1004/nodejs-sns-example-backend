@@ -5,13 +5,28 @@ const Post = require('../models/post');
 
 //현재 게시물 리스트 
 exports.getPostList = (req, res, next) => {
-    Post.find()
+    const curPage = req.query.page || 1;
+    const itemPerPage = 1;
+    let postsNum;
+
+    Post.find().countDocuments()
+        .then(count => {
+            postsNum = count;
+            return postsNum;
+        })
+        .then(postsNum => {
+            return Post.find()
+                .skip((curPage - 1) * itemPerPage)
+                .limit(itemPerPage);
+        })
         .then(posts => {
             console.log(posts)
             //더이상 뷰를 렌더링 하지 않을것이므로 json형태로 데이터 보냄.
             res.status(200).json({
                 msg: '게시물을 불러왔습니다.',
-                posts: posts
+                posts: posts,
+                totalItem: postsNum,
+                itemPerPage: itemPerPage
             })
         }).catch(err => {
             if (!err.statusCode) {
@@ -145,7 +160,7 @@ exports.deletePost = (req, res, next) => {
         })
         .then(postFilter => {
             res.status(200).json({
-                msg:'해당 게시물이 삭제되었습니다.',
+                msg: '해당 게시물이 삭제되었습니다.',
                 post: postFilter
             })
         })
