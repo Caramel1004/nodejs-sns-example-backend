@@ -1,4 +1,6 @@
 const express = require('express');
+const path = require('path');
+const fs = require('fs');
 const Post = require('../models/post');
 
 //현재 게시물 리스트 
@@ -27,12 +29,12 @@ exports.getPostDetail = (req, res, next) => {
 
     Post.findById(postId)
         .then(postDetail => {
-            if(postDetail){
+            if (postDetail) {
                 res.status(200).json({
                     msg: '해당게시물을 찾았습니다.',
                     postDetail: postDetail
                 })
-            }else{
+            } else {
                 const error = new Error('해당 게시물을 찾을수가 없습니다.');
                 error.statusCode = 404;
                 throw error;//catch문으로 전달
@@ -51,7 +53,7 @@ exports.getPostDetail = (req, res, next) => {
 exports.postPost = (req, res, next) => {
     const title = req.body.title;
     const content = req.body.content;
-    const imageUrl = req.file.path.replace("\\" ,"/");
+    const imageUrl = req.file.path.replace("\\", "/");
     console.log(imageUrl);
 
     const post = new Post({
@@ -63,6 +65,7 @@ exports.postPost = (req, res, next) => {
         }
     });
 
+    console.log('post: ', post)
     post.save()
         .then(postData => {
             res.status(201).json({
@@ -83,7 +86,81 @@ exports.postPost = (req, res, next) => {
         });
 }
 
+// 게시물 수정
 exports.updatePost = (req, res, next) => {
-    const imageUrl = req.file.path.replace("\\" ,"/");
+    const postId = req.params.postId;
+    const title = req.body.title;
+    const content = req.body.content;
+    let imageUrl = req.body.image;
+
+    if (req.file) {
+        imageUrl = req.file.path.replace("\\", "/");
+    }
+    console.log('컨트롤러 imageUrl : ', imageUrl);
+    return Post.findById(postId)
+        .then(post => {
+            if (!post) {
+                const error = new Error('이미지 파일이 없습니다.');
+                error.statusCode = 422;
+                throw error;
+            }
+            if (imageUrl !== post.imageUrl) {
+                clearImage(post.imageUrl);
+            }
+            post.title = title;
+            post.content = content;
+            post.imageUrl = imageUrl;
+            return post.save()
+                .then(result => {
+                    res.status(200).json({
+                        msg: '업데이트 완료했습니다!',
+                        post: result
+                    });
+                })
+                .catch(err => {
+                    if (!err.statusCode) {
+                        err.statusCode = 500;
+                    } else {
+                        next(err);
+                    }
+                })
+        }).catch(err => {
+            if (!err.statusCode) {
+                err.statusCode = 500;
+            } else {
+                next(err);
+            }
+        });
+
+}
+
+// 게시물 삭제
+exports.deletePost = (req, res, next) => {
+    const postId = req.params.postId;
+    console.log('postId: ', postId)
+    Post.findById(postId)
+        .then(post => {
+            clearImage(post.imageUrl);
+            return Post.findByIdAndRemove(postId);
+        })
+        .then(postFilter => {
+            res.status(200).json({
+                msg:'해당 게시물이 삭제되었습니다.',
+                post: postFilter
+            })
+        })
+        .catch((err) => {
+            if (!err.statusCode) {
+                err.statusCode = 500;
+            } else {
+                next(err);
+            }
+        });
+}
+
+// 게시물 수정하거나 삭제하는 경우 이미지폴더에서 해당 이미지 삭제
+const clearImage = filePath => {
+    filePath = path.join(__dirname, '..', filePath);
+    fs.unlink(filePath, err => console.log(err));
 }
 

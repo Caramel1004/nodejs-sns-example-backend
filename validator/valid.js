@@ -27,9 +27,18 @@ const validResult = (req, res, next) => {
 // 이미지 유무 체크 함수
 const hasImageFile = (req, res, next) => {
     const imageFile = req.file;
+    let imageUrl = req.body.image;
+
+    console.log('imageFile : ',imageFile);
+    console.log('imageUrl : ',imageUrl);
+    // 이미지 파일 경로 유무
+    if(!imageUrl) {
+        // 기존 imageUrl가 없으면 유저가 올린 파일 저장
+        imageUrl = imageFile.path.replace("\\" ,"/");
+    }
 
     // 이미지파일 유무
-    if (!imageFile) {
+    if (!imageFile && !imageUrl) {
         const error = new Error('이미지 파일이 없습니다.');
         error.statusCode = 422;
         throw error;
@@ -37,6 +46,8 @@ const hasImageFile = (req, res, next) => {
         next();
     }
 }
+
+
 
 // 게시물 유효성 검사
 module.exports.postValidCheck = [

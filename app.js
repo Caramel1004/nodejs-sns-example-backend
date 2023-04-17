@@ -65,7 +65,7 @@ app.use((error, req, res, next) => {
 })
 
 //몽구스와 연결후 서버 실행
-mongoose.connect('mongodb+srv://caramel1004:c6Zr1pGnvzoyFKwV@cluster0.vkqqcqz.mongodb.net/sns?retryWrites=true&w=majority')
+mongoose.connect('mongodb+srv://caramel1004:iCTMxCjUJzj0HaTA@cluster0.vkqqcqz.mongodb.net/sns?retryWrites=true&w=majority')
     .then(result => {
         app.listen(8080, () => console.log(`server 8080 start!!`));
     }).catch(err => {
