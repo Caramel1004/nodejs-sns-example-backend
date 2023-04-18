@@ -57,7 +57,7 @@ Emitted 'error' event on Server instance at:
   port: 8080
 }
 ```
-*해결
+* 해결
 - 기존의 서버를 먼저 내려주신 후 다시 실행하시면 됩니다 . 맥을 사용하신다면 터미널에서 pkill node를 이용해주시면 됩니다
 - 윈도우는 제가 찾아본 바로는 현재 백엔드 서버 포트는 8080을 사용하고 있기때문에 해당 포트를 사용하고있는 PID를 찾아서 그걸 내려주면 됩니다. netstat -ano | find "LISTENING" | find "8080" 이걸로 PID를 찾았다면 tasklist /F PID  PID숫자 이렇게 하면 해당 포트의 프로세스가 죽게 됩니다
 
