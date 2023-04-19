@@ -26,8 +26,8 @@ const fileStorage = multer.diskStorage({
 const fileFilter = (req, file, callback) => {
     const fileType = ['image/jpeg', 'image/png', 'image/jpg'];
     const mimeType = fileType.find(fileType => fileType === file.mimetype);
-    console.log('file : ',file);
-    console.log('mimeType : ',mimeType);
+    console.log('file : ', file);
+    console.log('mimeType : ', mimeType);
     if (mimeType) {
         callback(null, true);
     } else {
@@ -54,7 +54,7 @@ app.use((req, res, next) => {
 })
 
 app.use('/feed', feedRoutes);
-app.use(authRoutes);
+app.use('/auth', authRoutes);
 
 app.use((error, req, res, next) => {
     console.log('app.js error: ', error);

@@ -62,9 +62,9 @@ exports.postValidCheck = [
 // 사용자 추가 유효성 검사
 exports.userValidCheck = [
     body('email').isEmail().withMessage('이메일이 유효하지 않습니다.')
-        .custom((value, { req }) => {
-            console.log('req : ', req);
-            return User.findOne({ email: value })
+        .custom((email, { req }) => {
+            console.log('value : ', email);
+            return User.findOne({ email: email })
                 .then(userInfo => {
                     if (userInfo) {
                         return Promise.reject('이미 이메일이 존재 합니다.');
