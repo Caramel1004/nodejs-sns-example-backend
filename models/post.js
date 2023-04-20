@@ -16,7 +16,8 @@ const postSchema = new mongoose.Schema({
         required: true
     },
     creator: {
-        type: Object,
+        type: mongoose.Schema.Types.ObjectId,
+        reference: 'User',
         required: true
     },
     createAt: {

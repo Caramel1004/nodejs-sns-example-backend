@@ -1,11 +1,12 @@
 const path = require('path');
 const fs = require('fs');
 const Post = require('../models/post');
+const User = require('../models/user');
 
 //현재 게시물 리스트 
 exports.getPostList = (req, res, next) => {
     const curPage = req.query.page || 1;
-    const itemPerPage = 1;
+    const itemPerPage = 3;
     let postsNum;
 
     Post.find().countDocuments()
@@ -68,25 +69,39 @@ exports.postPost = (req, res, next) => {
     const title = req.body.title;
     const content = req.body.content;
     const imageUrl = req.file.path.replace("\\", "/");
+    let creator;
     console.log(imageUrl);
 
     const post = new Post({
         title: title,
         content: content,
         imageUrl: imageUrl,
-        creator: {
-            name: 'caramel'
-        }
+        creator: req.userId
     });
 
-    console.log('post: ', post)
-    post.save()
+    console.log('post: ', post);
+
+    User.findById(req.userId)
+        .then(user => {
+            creator = user;
+            user.posts.push(post);
+            return user.save();
+        })
+        .then(result => {
+            console.log('유저가 게시물을 올렸습니다.');
+            return post.save();
+        })
         .then(postData => {
             res.status(201).json({
-                message: '게시물이 성공적으로 생성되었습니다.',
-                post: postData
-            });
-        }).catch(err => {
+                message: '게시판에 글이 올라갔습니다.',
+                post: postData,
+                creator: {
+                    _id: creator._id,
+                    name: creator.name
+                }
+            })
+        })
+        .catch(err => {
             console.log('feed.js controller: ', err);
             // 에러 상태코드 체크
             if (!err.statusCode) {
