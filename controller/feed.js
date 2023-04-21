@@ -129,13 +129,19 @@ exports.updatePost = (req, res, next) => {
     return Post.findById(postId)
         .then(post => {
             if (!post) {
-                const error = new Error('이미지 파일이 없습니다.');
+                const error = new Error('해당 게시물이 없습니다.');
                 error.statusCode = 422;
                 throw error;
+            } else if (post.creator.toString() !== req.userId) {
+                const error = new Error('해당게시물의 저자가 아닙니다.');
+                error.statusCode = 403;
+                throw error;
             }
+
             if (imageUrl !== post.imageUrl) {
                 clearImage(post.imageUrl);
             }
+
             post.title = title;
             post.content = content;
             post.imageUrl = imageUrl;
@@ -166,16 +172,45 @@ exports.updatePost = (req, res, next) => {
 // 게시물 삭제
 exports.deletePost = (req, res, next) => {
     const postId = req.params.postId;
-    console.log('postId: ', postId)
-    Post.findById(postId)
+    console.log('postId: ', postId);
+
+    User.findById(req.userId)
+        .then(user => {
+            console.log(user);
+
+            // 몽구스에서 제공하는 pull() 함수를 사용하여도 됨
+            // user.posts.pull(postId);
+
+            // 자바스크립트의 필터 함수 사용해서 필터링 해도됨
+            const filterPost = user.posts.filter(post => 
+                post.toString() !== postId
+            )
+            console.log('필터링된 배열: ', filterPost);
+            user.posts = [...filterPost];
+            return user.save();
+        })
+        .then(user => {
+            console.log('해당 유저 게시물: ',user.posts);
+            return Post.findById(postId);
+        })
         .then(post => {
+            if (!post) {
+                const error = new Error('해당 게시물이 없습니다.');
+                error.statusCode = 422;
+                throw error;
+            } else if (post.creator.toString() !== req.userId) {
+                const error = new Error('해당게시물의 저자가 아닙니다.');
+                error.statusCode = 403;
+                throw error;
+            }
+
             clearImage(post.imageUrl);
             return Post.findByIdAndRemove(postId);
         })
-        .then(postFilter => {
+        .then(deletedPost => {
             res.status(200).json({
                 msg: '해당 게시물이 삭제되었습니다.',
-                post: postFilter
+                post: deletedPost
             })
         })
         .catch((err) => {
