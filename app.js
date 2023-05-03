@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
+const SocketIO = require('./socket');
 
 const feedRoutes = require('./routes/feed');
 const authRoutes = require('./routes/auth');
@@ -57,7 +58,7 @@ app.use('/feed', feedRoutes);
 app.use('/auth', authRoutes);
 
 app.use((error, req, res, next) => {
-    console.log('app.js error: ', error);
+    console.log('app.js: ', error);
     const statusCode = (!error.statusCode) ? 500 : error.statusCode;
     const msg = error.message;
     const data = error.data;
@@ -67,12 +68,17 @@ app.use((error, req, res, next) => {
         statusCode: statusCode,
         data: data
     });
+    next();
 })
 
 //몽구스와 연결후 서버 실행
 mongoose.connect('mongodb+srv://caramel1004:XoeKJhUja1sNrY4e@cluster0.vkqqcqz.mongodb.net/sns?retryWrites=true&w=majority')
     .then(result => {
-        app.listen(8080, () => console.log(`server 8080 start!!`));
+        const server = app.listen(8080, () => console.log(`Node Server 8080 start!!`));
+        const io = SocketIO.init(server);
+        io.on('connection', socket => {
+            console.log('socket 가동!!!');
+        });
     }).catch(err => {
         console.log('app.js err:', err);
     });

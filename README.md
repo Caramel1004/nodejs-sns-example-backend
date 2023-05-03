@@ -32,7 +32,32 @@ postData("https://example.com/answer", { answer: 42 }).then((data) => {
 ```
 
 # Error
-- cors 오류
+- cors 오류: 브라우저와 서버의 도메인이 일치하지 않아서 생기는 오류이며 요청이 차단된다.
+이 경우 요청 권한을 허락하도록 지정해줘야 한다.
+1. nodejs 자체서버 도메인과 클라이언트 도메인이 일치하지 않는 경우
+요청 헤더를 세팅해준다.
+```javascript
+app.use((req, res, next) => {
+    //cors에러 해결을 위한 헤더설정
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    next();
+})
+```
+
+2. 웹 소켓 사용시 소켓에서 나오는 cors오류
+option값에 세팅해준다.
+```javascript
+ const server = app.listen(8080, () => console.log(`Node Server 8080 start!!`));
+        const io = SocketIO(server,{
+            cors: {
+                origin: '*',
+            }
+        });
+        io.on('connection', socket => {
+            
+```
 
 - port 충돌 오류
 ```t
@@ -154,3 +179,4 @@ const postSchema = new mongoose.Schema({
 
 module.exports = mongoose.model('Post', postSchema);
 ```
+

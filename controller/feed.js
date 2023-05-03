@@ -2,11 +2,12 @@ const path = require('path');
 const fs = require('fs');
 const Post = require('../models/post');
 const User = require('../models/user');
+const SocketIO = require('../socket');
 
 //현재 게시물 리스트 
 exports.getPostList = (req, res, next) => {
     const curPage = req.query.page || 1;
-    const itemPerPage = 3;
+    const itemPerPage = 2;
     let postsNum;
 
     Post.find().countDocuments()
@@ -16,6 +17,7 @@ exports.getPostList = (req, res, next) => {
         })
         .then(postsNum => {
             return Post.find()
+                .populate('creator')
                 .skip((curPage - 1) * itemPerPage)
                 .limit(itemPerPage);
         })
@@ -65,6 +67,7 @@ exports.getPostDetail = (req, res, next) => {
 
 
 //게시물 추가
+// 웹 소켓 추가
 exports.postPost = (req, res, next) => {
     const title = req.body.title;
     const content = req.body.content;
@@ -92,6 +95,19 @@ exports.postPost = (req, res, next) => {
             return post.save();
         })
         .then(postData => {
+            console.log('name : ', creator.name);
+            const socketIO = SocketIO.getIO();
+            socketIO.emit('posts', {
+                action: 'create',
+                post: {
+                    ...post._doc,
+                    creator: {
+                        _id: req.userId,
+                        name: creator.name
+                    }
+                }
+            });
+
             res.status(201).json({
                 message: '게시판에 글이 올라갔습니다.',
                 post: postData,
@@ -182,7 +198,7 @@ exports.deletePost = (req, res, next) => {
             // user.posts.pull(postId);
 
             // 자바스크립트의 필터 함수 사용해서 필터링 해도됨
-            const filterPost = user.posts.filter(post => 
+            const filterPost = user.posts.filter(post =>
                 post.toString() !== postId
             )
             console.log('필터링된 배열: ', filterPost);
@@ -190,7 +206,7 @@ exports.deletePost = (req, res, next) => {
             return user.save();
         })
         .then(user => {
-            console.log('해당 유저 게시물: ',user.posts);
+            console.log('해당 유저 게시물: ', user.posts);
             return Post.findById(postId);
         })
         .then(post => {
