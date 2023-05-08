@@ -72,7 +72,7 @@ app.use((error, req, res, next) => {
 })
 
 //몽구스와 연결후 서버 실행
-mongoose.connect('mongodb+srv://caramel1004:XoeKJhUja1sNrY4e@cluster0.vkqqcqz.mongodb.net/sns?retryWrites=true&w=majority')
+mongoose.connect('mongodb+srv://caramel1004:sK0eztAhijnYoDlT@cluster0.vkqqcqz.mongodb.net/sns?retryWrites=true&w=majority')
     .then(result => {
         const server = app.listen(8080, () => console.log(`Node Server 8080 start!!`));
         const io = SocketIO.init(server);

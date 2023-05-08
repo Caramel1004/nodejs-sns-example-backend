@@ -7,7 +7,7 @@ const SocketIO = require('../socket');
 //현재 게시물 리스트 
 exports.getPostList = (req, res, next) => {
     const curPage = req.query.page || 1;
-    const itemPerPage = 2;
+    const itemPerPage = 4;
     let postsNum;
 
     Post.find().countDocuments()
@@ -18,6 +18,7 @@ exports.getPostList = (req, res, next) => {
         .then(postsNum => {
             return Post.find()
                 .populate('creator')
+                .sort({createdAt: -1})//-1: 내림차순 1: 오름차순
                 .skip((curPage - 1) * itemPerPage)
                 .limit(itemPerPage);
         })
@@ -97,7 +98,7 @@ exports.postPost = (req, res, next) => {
         .then(postData => {
             console.log('name : ', creator.name);
             const socketIO = SocketIO.getIO();
-            socketIO.emit('posts', {
+            socketIO.emit('updatePost', {
                 action: 'create',
                 post: {
                     ...post._doc,
@@ -158,14 +159,21 @@ exports.updatePost = (req, res, next) => {
                 clearImage(post.imageUrl);
             }
 
+            if(imageUrl !== undefined && imageUrl !== null) {
+                post.imageUrl = imageUrl;
+            }
             post.title = title;
             post.content = content;
-            post.imageUrl = imageUrl;
             return post.save()
-                .then(result => {
+                .then(editPost => {
+                    const socketIO = SocketIO.getIO();
+                    socketIO.emit('updatePost',{
+                        action: 'edit',
+                        post: editPost
+                    })
                     res.status(200).json({
                         msg: '업데이트 완료했습니다!',
-                        post: result
+                        post: editPost
                     });
                 })
                 .catch(err => {
@@ -188,6 +196,7 @@ exports.updatePost = (req, res, next) => {
 // 게시물 삭제
 exports.deletePost = (req, res, next) => {
     const postId = req.params.postId;
+    let deletePost;
     console.log('postId: ', postId);
 
     User.findById(req.userId)
@@ -223,10 +232,18 @@ exports.deletePost = (req, res, next) => {
             clearImage(post.imageUrl);
             return Post.findByIdAndRemove(postId);
         })
-        .then(deletedPost => {
+        .then(deletePost => {
+            // 백에서 삭제해야할 게시물을 프론트에 보낸다.
+            console.log('삭제된 게시물: ', deletePost);
+            const sorverIO = SocketIO.getIO();
+            sorverIO.emit('updatePost', {
+                action: 'delete',
+                post: deletePost
+            });
+
             res.status(200).json({
                 msg: '해당 게시물이 삭제되었습니다.',
-                post: deletedPost
+                post: deletePost
             })
         })
         .catch((err) => {

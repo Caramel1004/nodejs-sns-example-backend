@@ -10,7 +10,7 @@ module.exports = {
                 headers: 'Content-Type, Authorization'
             }
         });
-        console.log('socketIO: ',socketIO);
+        // console.log('socketIO: ',socketIO);
         return socketIO;
     },
     getIO: () => {
